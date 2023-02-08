@@ -1,0 +1,83 @@
+---
+
+# - name: Setup local project folder
+#   loop: "{{ grafana_volumes }}"
+#   file:
+#     state: directory
+#     path: "{{ item.local_path }}"
+#     mode: "{{ item.mode | default(omit) }}"
+#     # owner: "{{ item.local_owner | default(omit) }}"
+#     # group: "{{ item.local_group | default(omit) }}"
+
+
+
+# - name: Setup Config folders
+#   loop: "{{ grafana_config_files }}"
+#   file:
+#     state: directory
+#     path: "{{ grafana_provisioning_local_directory }}/{{ item.type }}"
+#     mode: "{{ item.mode | default(omit) }}"
+#     # owner: "{{ item.local_owner | default(omit) }}"
+#     # group: "{{ item.local_group | default(omit) }}"
+#   notify: [restart grafana container]
+
+# - name: Write out grafana configuration file
+#   loop: "{{ grafana_config_files }}"
+#   template:
+#     src: "{{ item.template }}"
+#     dest: "{{ grafana_provisioning_local_directory }}/{{ item.type }}/{{ item.local_file }}"
+#     owner: "{{ item.owner | default(omit) }}"
+#     mode: "{{ item.mode | default(omit) }}"
+#   notify: [restart grafana container]
+
+# - name: Write out dashboards file(s)
+#   loop: "{{ grafana_dashboard_files }}"
+#   template:
+#     src: "{{ item.template }}"
+#     dest: "{{ grafana_provisioning_local_directory }}/{{ item.type }}/{{ item.local_file }}"
+#     owner: "{{ item.owner | default(omit) }}"
+#     mode: "{{ item.mode | default(omit) }}"
+#   notify: [restart grafana container]
+
+# - name: Deploy grafana
+#   docker_container:
+#     name: "{{ grafana_name }}"
+#     image: "{{ grafana_image }}:{{ grafana_version }}"
+#     ports: "{{ grafana_ports }}"
+#     volumes: "{{ grafana_volumes | to_json | from_json | json_query('[].join(`:`, [local_path, container_path])') }}"  # to and from json is because of a bug in ansible
+#     env: "{{ grafana_env | default(omit) }}"
+#     state: started
+#     restart_policy: unless-stopped
+
+
+# - name: Flush handlers
+#   meta: flush_handlers
+
+- name: Setup local project folder
+  loop: "{{ grafana_volumes }}"
+  file:
+    state: directory
+    path: "{{ item.local_path }}"
+    mode: "{{ item.mode | default(omit) }}"
+    owner: "{{ item.local_owner | default(omit) }}"
+    group: "{{ item.local_group | default(omit) }}"
+
+- name: Lay Down grafana Config Files
+  loop: "{{ grafana_config_files }}"
+  copy:
+    content: "{{ item.content | default(omit) }}"
+    src: "{{ item.src | default(omit) }}"
+    dest: "{{ item.path }}"
+  notify:
+    - restart grafana
+
+
+- name: Deploy grafana Container
+  docker_container:
+    name: "{{ grafana_name }}"
+    image: "{{ grafana_image }}:{{ grafana_version }}"
+    ports: "{{ grafana_ports }}"
+    env: "{{ grafana_env }}"
+    volumes: "{{ grafana_volumes | to_json | from_json | json_query('[].join(`:`, [local_path, container_path])') }}"  # to and from json is because of a bug in ansible
+    state: started
+    restart_policy: unless-stopped

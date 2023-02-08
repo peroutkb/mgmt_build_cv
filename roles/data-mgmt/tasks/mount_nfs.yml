@@ -1,0 +1,13 @@
+- name: check mountpoint exist
+  ansible.builtin.file:
+    path: "{{ mountpoint }}"
+    state: directory
+    mode: 0777
+
+- name: mount network share
+  ansible.posix.mount:
+    src: "{{ mynfs }}"
+    path: "{{ mountpoint }}"
+    fstype: nfs
+    opts: "{{ myopts }}"
+    state: mounted

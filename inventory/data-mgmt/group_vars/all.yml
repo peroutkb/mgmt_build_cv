@@ -1,0 +1,6 @@
+---
+
+influxdb_token: "at1c0cNNSMMBSyQw0vA1QbbhYXztdvIIf4JfAue8WjDSHHjD4dKuwfAJZc3uDHNwyJCHbgEBMrOa0rglU2VSwA=="
+mountpoint: /data
+mynfs: "10.255.39.130/infra_mgmt_data"
+myopts: 'rw,sync'

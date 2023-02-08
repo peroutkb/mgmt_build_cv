@@ -1,0 +1,31 @@
+---
+# - name: Write out portainer configuration file
+#   template:
+#     src: portainer.conf.j2
+#     dest: /data/portainer/portainer.conf
+
+# - name: Setup local project folder
+#   loop: "{{ portainer_volumes }}"
+#   file:
+#     state: directory
+#     path: "{{ item.local_path }}"
+#     mode: "{{ item.mode | default(omit) }}"
+#     owner: "{{ item.local_owner | default(omit) }}"
+#     group: "{{ item.local_group | default(omit) }}"
+- name: Create password file for Portainer
+  copy:
+    dest: /data/portainer_data/portainer_admin_password
+    content: Go2atc4labs!
+    mode: 777
+
+- name: Deploy Portainer
+  docker_container:
+    name: "{{ portainer_name }}"
+    image: "{{ portainer_image }}:{{ portainer_version }}"
+    ports: "{{ portainer_ports }}"
+    volumes: "{{ portainer_volumes | to_json | from_json | json_query('[].join(`:`, [local_path, container_path])') }}"  # to and from json is because of a bug in ansible
+    command:
+      - '--admin-password-file=/data/portainer_admin_password'
+      - '--host=unix://var/run/docker.sock'
+    env: "{{ portainer_env | default(omit) }}"
+    restart_policy: always

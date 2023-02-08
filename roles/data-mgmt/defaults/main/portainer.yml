@@ -1,0 +1,10 @@
+---
+portainer_name: portainer
+portainer_image: cr.portainer.io/portainer/portainer-ce
+portainer_version: 2.11.0
+portainer_ports: ["8000:8000","9443:9443"]
+portainer_volumes:
+  - local_path: /var/run/docker.sock
+    container_path: /var/run/docker.sock
+  - local_path: /data/portainer_data
+    container_path: /data

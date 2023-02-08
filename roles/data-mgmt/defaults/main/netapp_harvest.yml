@@ -1,0 +1,36 @@
+---
+harvest_config_files:
+  - path: /data/netapp/harvest/harvest.yml
+    content: |
+      {{ harvest_config | to_nice_yaml(indent=2) }}
+harvest_port: 13001
+harvest_config_file: /data/netapp/harvest/harvest.yml
+harvest_config:
+  Exporters:
+    cv-fas500-cl1:
+      exporter: Prometheus
+      addr: 0.0.0.0
+      port: 13001
+  Pollers: 
+    cv-fas500-cl1:
+      datacenter: atc
+      addr: 10.255.19.140
+      collectors:
+        - Zapi
+        - ZapiPerf
+      exporters:
+        - cv-fas500-cl1
+      auth_style: basic_auth
+      username: admin
+      password: WWTwwt1!
+      use_insecure_tls: true
+
+harvest_image: cr.netapp.io/harvest
+harvest_version: latest 
+harvest_config_file: /data/netapp/harvest/harvest.yml
+harvest_name_prefix: "netapp-harvest-"
+harvest_volumes:
+  - local_path: /data/netapp/harvest
+    local_mode: '0777'
+    local_owner: 1000
+    local_group: 1000

@@ -1,0 +1,17 @@
+---
+- name: Setup local project folder
+  loop: "{{ influxdbv1_volumes }}"
+  file:
+    state: directory
+    path: "{{ item.local_path }}"
+    mode: "{{ item.mode | default(omit) }}"
+    owner: "{{ item.local_owner | default(omit) }}"
+    group: "{{ item.local_group | default(omit) }}"
+
+- name: Deploy InfluxDB
+  docker_container:
+    name: "{{ influxdbv1_name }}"
+    image: "{{ influxdbv1_image }}:{{ influxdbv1_version }}"
+    ports: "{{ influxdbv1_ports }}"
+    volumes: "{{ influxdbv1_volumes | to_json | from_json | json_query('[].join(`:`, [local_path, container_path])') }}"  # to and from json is because of a bug in ansible
+    env: "{{ influxdbv1_env | default(omit) }}"

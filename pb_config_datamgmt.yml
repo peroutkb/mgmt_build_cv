@@ -1,0 +1,10 @@
+---
+- hosts: datamgmt
+  gather_facts: false
+  become: true
+
+  tasks:
+    - name: Install Pre-Reqs
+      include_role:
+        name: data-mgmt
+        tasks_from: main

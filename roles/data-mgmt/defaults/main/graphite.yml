@@ -1,0 +1,19 @@
+---
+graphite_name: graphite
+graphite_image: graphiteapp/graphite-statsd
+graphite_ports: ["80:80","2003-2004:2003-2004","2023-2024:2023-2024","8125:8125/udp","8126:8126"]
+graphite_volumes:
+  - local_path: /data/graphite/data
+    container_path: /opt/graphite/storage
+    local_mode: '0777'
+  - local_path: /data/graphite/conf
+    container_path: /opt/graphite/conf
+    local_mode: '0777'    
+  - local_path: /data/graphite/statsd_config
+    container_path: /opt/statsd/config
+    local_mode: '0777'
+  - local_path: /var/log/graphite
+    container_path: /var/log
+    local_mode: '0777'
+graphite_env:
+  GRAPHITE_TIME_ZONE: America/Chicago

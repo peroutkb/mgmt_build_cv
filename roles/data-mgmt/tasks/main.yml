@@ -1,0 +1,10 @@
+---
+# - include_tasks: basic_req.yml
+# - include_tasks: mount_nfs.yml
+# - include_tasks: install_docker.yml
+# - include_tasks: install_portainer.yml
+# - include_tasks: install_influxdbv1.yml
+- include_tasks: install_grafana.yml
+# - include_tasks: install_graphite.yml
+#  - include_tasks: install_prometheus.yml 
+#  - include_tasks: install_netapp_harvest.yml

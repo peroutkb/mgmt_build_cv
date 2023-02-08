@@ -1,0 +1,11 @@
+[all:vars]
+ansible_user=root
+ansible_ssh_pass=Go2atc4labs!
+ansible_sudo_pass=Go2atc4labs!
+wwt_standard_password=Go2atc4labs!
+
+[datamgmt]
+cvmgmt.cybervault.local ansible_host=10.255.19.153
+
+[ontap]
+cv-fas500-cl1.cybervault.local netapp_hostname=10.255.19.140

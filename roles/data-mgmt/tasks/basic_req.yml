@@ -1,0 +1,41 @@
+---
+# - name: Set a hostname
+#   ansible.builtin.hostname:
+#     name: mgmt
+
+- name: Install Cockpit
+  package: 
+    name: cockpit
+    state: latest
+
+- name: Install Pip
+  package:
+    name: pip
+    state: latest
+
+- name: Enable and start cockpit
+  ansible.builtin.systemd:
+    name: cockpit.socket
+    state: started
+    enabled: yes
+
+- name: Ensure firewalld service is disabled and stopped
+  systemd:
+    name: firewalld
+    state: stopped
+    enabled: no
+
+- name: Put SELinux in permissive mode, logging actions that would be blocked.
+  selinux:
+    policy: targeted
+    state: permissive
+
+- name: install cockpit packages
+  package: 
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - cockpit-pcp
+    - cockpit-storaged
+    - epel-release
+    - nfs-utils

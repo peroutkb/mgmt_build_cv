@@ -1,0 +1,40 @@
+---
+# - name: Deploy Prometheus
+#   docker_container:
+#     name: prometheus
+#     image: prom/prometheus:v2.33.1
+#     ports: 9191:9090
+#     volumes:
+#       - "/data/prometheus/docker/prometheus:/etc/prometheus"
+#       - "/data/prometheus/prometheus_data:/prometheus"
+#     command:
+#       - '--config.file=/etc/prometheus/prometheus.yml'
+#       - '--storage.tsdb.path=/prometheus'
+#       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+#       - '--web.console.templates=/usr/share/prometheus/consoles'
+
+- name: Setup local project folder
+  loop: "{{ prometheus_volumes }}"
+  file:
+    state: directory
+    path: "{{ item.local_path }}"
+    mode: "{{ item.local_mode | default(omit) }}"
+    owner: "{{ item.local_owner | default(omit) }}"
+    group: "{{ item.local_group | default(omit) }}"
+
+- name: Lay Down Prometheus Config Files
+  loop: "{{ prometheus_config_files }}"
+  copy:
+    content: "{{ item.content }}"
+    dest: "{{ item.path }}"
+  notify:
+    - restart prometheus
+
+- name: Deploy Prometheus Container
+  docker_container:
+    name: "{{ prometheus_name }}"
+    image: "{{ prometheus_image }}:{{ prometheus_version }}"
+    ports: "{{ prometheus_ports }}"
+    volumes: "{{ prometheus_volumes | to_json | from_json | json_query('[].join(`:`, [local_path, container_path])') }}"  # to and from json is because of a bug in ansible
+    state: started
+    restart_policy: unless-stopped

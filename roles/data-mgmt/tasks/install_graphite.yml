@@ -1,0 +1,15 @@
+---
+- name: Deploy Graphite
+  docker_container:
+    name: "{{ graphite_name }}"
+    image: "{{ graphite_image }}"
+    ports: "{{ graphite_ports }}"
+    volumes: "{{ graphite_volumes | to_json | from_json | json_query('[].join(`:`, [local_path, container_path])') }}"  # to and from json is because of a bug in ansible
+    env: "{{ graphite_env | default(omit) }}"
+
+## Copy Storage-Schemas.conf file to enable 1s retention (Default is 10s)
+- name: Update storage-schemas.conf file
+  template:
+    src: graphite_storage-schemas.conf.j2
+    dest: /data/graphite/conf/storage-schemas.conf
+  notify: [restart graphite container]

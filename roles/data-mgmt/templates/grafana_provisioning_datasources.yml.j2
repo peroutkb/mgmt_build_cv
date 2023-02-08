@@ -1,0 +1,24 @@
+# config file version
+apiVersion: 1
+
+datasources:
+ # - name: influxdbv1
+ #   type: influxdb
+ #   access: direct
+ #   url: "http://{{inventory_hostname}}:8087"
+ #   database: telegraf
+ #   isDefault: 1
+ #   jsonData:
+ #     version: InfluxQL
+ #     tlsSkipVerify: true
+  - name: graphite
+    type: graphite
+    url: "http://{{inventory_hostname}}"
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    orgId: 1
+    url: http://{{inventory_hostname}}:9191
+    basicAuth: false
+    isDefault: true
+    editable: true

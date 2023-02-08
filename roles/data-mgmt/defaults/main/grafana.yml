@@ -1,0 +1,127 @@
+---
+# grafana_name: grafana-oss
+# grafana_image: grafana/grafana-oss
+# grafana_version: latest
+# grafana_ports: ["3000:3000"]
+# grafana_user: admin
+# grafana_passwd: WWTwwt1!
+# grafana_provisioning_local_directory: "/data/grafana/provisioning"
+# grafana_provisioning_directory: "/etc/grafana/provisioning"
+
+# grafana_volumes:
+#   - local_path: "{{ grafana_provisioning_local_directory }}"
+#     container_path: "{{ grafana_provisioning_directory }}"
+#     mode: '0777'
+#     local_owner: '472'
+
+# grafana_config_files:
+#   - type: datasources
+#     template: grafana_provisioning_datasources.yml.j2
+#     local_file: datasources.yaml
+#     mode: '0777'
+#     local_owner: '472'
+#   - type: dashboards
+#     template: grafana_provisioning_dashboards.yml.j2
+#     local_file: dashboards.yaml
+#     mode: '0777'
+#     local_owner: '472'
+
+# grafana_dashboard_files:
+#   - type: dashboards
+#     template: grafana_dashboards_vdbench.json.j2
+#     local_file: cvlab-vdbench.json
+#     mode: '0777'
+#     local_owner: '472'
+
+
+# grafana_env:
+#   GF_INSTALL_PLUGINS: grafana-clock-panel
+#   #GF_<SectionName>_<KeyName>
+#   GF_DEFAULT_INSTANCE_NAME: cvlab
+#   GF_SECURITY_ADMIN_USER: "{{ grafana_user }}"
+#   GF_SECURITY_ADMIN_PASSWORD: "{{ grafana_passwd }}"
+#   # This updates the min refresh interval you can set in Grafana, update grafana.ini file
+#   GF_DASHBOARDS_MIN_REFRESH_INTERVAL: 1s
+#   GF_SERVER_SERVE_FROM_SUB_PATH: 'true'
+#   GF_AUTH_ANONYMOUS_ENABLED: 'true'
+#   GF_AUTH_ANONYMOUS_ORG_NAME: Main Org.
+#   GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+#   GF_AUTH_ANONYMOUS_HIDE_VERSION: 'true'
+#   # Renderer values
+#   # GF_RENDERING_SERVER_URL: http://mgmt.sblab.wwtpoc.local:8081/render
+#   # GF_RENDERING_CALLBACK_URL: http://mgmt.sblab.wwtpoc.local:3000/
+#   # GF_LOG_FILTERS: rendering:debug
+
+grafana_env:
+  GF_INSTALL_PLUGINS: grafana-clock-panel
+  #GF_<SectionName>_<KeyName>
+  GF_DEFAULT_INSTANCE_NAME: cvlab
+  GF_SECURITY_ADMIN_USER: admin
+  GF_SECURITY_ADMIN_PASSWORD: WWTwwt1!
+  # This updates the min refresh interval you can set in Grafana, update grafana.ini file
+  GF_DASHBOARDS_MIN_REFRESH_INTERVAL: 1s
+  GF_SERVER_SERVE_FROM_SUB_PATH: 'true'
+  GF_AUTH_ANONYMOUS_ENABLED: 'true'
+  GF_AUTH_ANONYMOUS_ORG_NAME: Main Org.
+  GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+  GF_AUTH_ANONYMOUS_HIDE_VERSION: 'true'
+  # Renderer values
+  # GF_RENDERING_SERVER_URL: http://mgmt.sblab.wwtpoc.local:8081/render
+  # GF_RENDERING_CALLBACK_URL: http://mgmt.sblab.wwtpoc.local:3000/
+  # GF_LOG_FILTERS: rendering:debug
+
+grafana_volumes:
+  - local_path: /data/grafana/datasources
+    container_path: /etc/grafana/provisioning/datasources
+    local_mode: '0766'
+    local_owner: 472
+    local_group: 472
+  - local_path: /data/grafana/dashboards
+    container_path: /etc/grafana/provisioning/dashboards
+    local_mode: '0766'
+    local_owner: 472
+    local_group: 472
+  - local_path: /data/grafana/dashboard_configs
+    container_path: /etc/dashboards
+    local_mode: '0766'
+    local_owner: 472
+    local_group: 472
+  - local_path: /data/grafana/provisioning
+    container_path: /etc/grafana/provisioning
+    local_mode: '0766'
+    local_owner: 472
+    local_group: 472
+
+grafana_config_files:
+  - path: /data/grafana/datasources/prometheus.yml
+    content: |
+      apiVersion: 1
+      datasources:
+        - name: prometheus
+          type: prometheus
+          url: http://{{ inventory_hostname }}:9191
+        - name: graphite
+          type: graphite
+          url: "http://{{inventory_hostname}}"
+  - path: /data/grafana/dashboards/node_exporter.yml
+    content: |
+      apiVersion: 1
+      providers:
+        - name: dashboards
+          type: file
+          updateIntervalSeconds: 30
+          options:
+            path: /etc/dashboards
+            foldersFromFilesStructure: true
+  - path: /data/grafana/dashboard_configs
+    src: "{{ playbook_dir }}/dashboard_files/"
+
+grafana_name: grafana
+grafana_image: grafana/grafana-oss
+grafana_version: latest
+grafana_ports: ["3000:3000"]
+
+
+
+# grafana_config_file_path: /grafana_config/prometheus.yml
+

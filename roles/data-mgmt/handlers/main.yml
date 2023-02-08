@@ -1,0 +1,38 @@
+---
+- name: restart docker
+  service:
+    name: docker
+    state: restarted
+
+- name: restart grafana container
+  docker_container:
+    name: "{{ grafana_name }}"
+    state: started
+    restart: yes
+
+- name: restart graphite container
+  docker_container:
+    name: "{{ graphite_name }}"
+    state: started
+    restart: yes
+
+- name: restart prometheus
+  docker_container:
+    name: "{{ prometheus_name }}"
+    state: started
+    restart: true
+
+- name: restart harvest
+  loop: "{{ harvest_config.Pollers | dict2items }}"
+  docker_container:
+    name: "{{ harvest_name_prefix }}{{ item.key }}"
+    state: started
+    restart: true
+  notify:
+    - restart harvest
+
+- name: restart grafana
+  docker_container:
+    name: "{{ grafana_name }}"
+    state: started
+    restart: true

@@ -1,0 +1,33 @@
+---
+prometheus_config:
+  global:
+    scrape_interval: 1m
+    scrape_timeout: 30s
+    evaluation_interval: 1m
+    external_labels:
+      wwt_lab: cvlab
+  scrape_configs:
+    - job_name: 'cv-fas500-cl1'
+      static_configs:
+        - labels:
+            job: cv-fas500-cl1
+          targets:
+            - 10.255.19.153:13001
+
+prometheus_config_files:
+  - path: /data/prometheus/prometheus.yml
+    content: |
+      {{ prometheus_config | to_nice_yaml(indent=2) }}
+
+prometheus_name: prometheus
+prometheus_image: prom/prometheus
+prometheus_version: v2.35.0
+prometheus_ports: ["9191:9090"]
+prometheus_volumes:
+  - local_path: /data/prometheus/
+    container_path: /etc/prometheus
+    local_mode: '0777'
+    local_owner: 1000
+    local_group: 1000
+prometheus_config_file_path: /data/prometheus/prometheus.yml
+

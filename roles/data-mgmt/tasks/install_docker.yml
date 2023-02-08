@@ -1,0 +1,54 @@
+- name: Setup Docker Repos
+  shell: |
+    yum install -y yum-utils
+    yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+  args:
+    creates: /etc/yum.repos.d/docker-ce.repo
+
+- name: Remove Podman and BuildAH
+  yum: 
+    name:
+      - podman
+      - buildah
+    state: absent
+
+- name: Install Docker and python
+  yum:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - python3
+    state: present
+
+- name: Install Docker Python Package
+  pip:
+    name: docker
+
+- name: Ensure Docker is started and enabled
+  service:
+    enabled: true
+    name: docker
+    state: started
+
+- name: Create Docker Config Directory
+  file:
+    path: /etc/docker
+    state: directory
+
+- name: Configure Docker Daemon Config
+  copy:
+    content: "{{ docker_daemon_config | to_nice_json }}"
+    dest: /etc/docker/daemon.json
+  notify: [restart docker]
+
+- name: add users to docker group
+  user:
+    name: '{{ item }}'
+    groups: 'docker'
+    append: 'yes'
+  with_items: 
+    - admin
+
+- name: Flush handlers
+  meta: flush_handlers

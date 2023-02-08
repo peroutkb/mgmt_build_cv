@@ -1,0 +1,46 @@
+---
+# - name: Install Netapp Harvest Poller for Netapp
+#   docker_container:
+#     name: poller-cv-fas500-cl1
+#     image: cr.netapp.io/harvest:latest
+#     ports: 13001:13001
+#     volumes:
+#       - "/data/netapp/harvest/conf:/opt/harvest/conf"
+#       - "/data/netapp/harvest/cert:/opt/harvest/cert"
+#       - "/data/netapp/harvest/harvest.yml:/opt/harvest.yml"
+#     command: --poller ontap01 --promPort 13001 --config /opt/harvest.yml
+#     restart_policy: always
+
+- name: Setup local project folder
+  loop: "{{ harvest_volumes }}"
+  file:
+    state: directory
+    path: "{{ item.local_path }}"
+    mode: "{{ item.local_mode | default(omit) }}"
+    owner: "{{ item.local_owner | default(omit) }}"
+    group: "{{ item.local_group | default(omit) }}"
+
+- name: Lay Down Harvest Config Files
+  copy:
+    content: "{{ harvest_config | to_nice_yaml(indent=2) }}"
+    dest: "{{ harvest_config_file }}"
+  notify:
+    - restart harvest
+
+- debug:
+    msg: "{{ harvest_config.Pollers | dict2items }}"
+
+- name: Deploy Harvest
+  loop: "{{ harvest_config.Pollers | dict2items }}"
+  docker_container:
+    name: "{{ harvest_name_prefix }}{{ item.key }}"
+    image: "{{ harvest_image }}:{{ harvest_version }}"
+    ports:
+      - "{{ harvest_config.Exporters[item.value.exporters[0]].port }}:{{ harvest_config.Exporters[item.value.exporters[0]].port }}"
+    volumes:
+      - "{{ harvest_config_file }}:/opt/harvest.yml"
+    command: --poller {{ item.key }} --promPort {{ harvest_config.Exporters[item.value.exporters[0]].port }} --config /opt/harvest.yml
+    state: started
+    restart_policy: unless-stopped
+  notify:
+    - restart harvest

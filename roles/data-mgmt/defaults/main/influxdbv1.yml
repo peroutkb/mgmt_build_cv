@@ -1,0 +1,20 @@
+---
+influxdbv1_name: influxdb
+influxdbv1_image: influxdb
+influxdbv1_version: 1.8.10-alpine
+influxdbv1_ports: ["8087:8086"]
+influxdbv1_volumes:
+  - local_path: /data/influxdb/data
+    container_path: /var/lib/influxdb
+    local_mode: '0777'
+    # local_owner: 1000
+    # local_group: 1000
+  - local_path: /data/influxdb/config
+    container_path: /etc/influxdb
+    local_mode: '0777'
+    # local_owner: 1000
+    # local_group: 1000
+
+influxdbv1_env:
+  influxdbv1_ADMIN_USER: admin
+  influxdbv1_ADMIN_USER_PASSWORD: "{{ wwt_standard_password }}" # The password to set for the system's inital super-user (Required)
